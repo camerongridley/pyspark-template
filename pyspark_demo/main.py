@@ -1,9 +1,9 @@
-from utils import math
+from pyspark_demo.utils import math_ops
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
-from pyspark.sql.functions import lit
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.functions import col
 
-print(math.add(1, 2))
+print('1 + 2 =', math_ops.add(1, 2))
 
 spark = SparkSession.builder \
     .appName('pyspark template') \
@@ -11,9 +11,9 @@ spark = SparkSession.builder \
 
 # Define schema for the DataFrame
 schema = StructType([
-    StructField("Name", StringType(), True),
-    StructField("Age", IntegerType(), True),
-    StructField("City", StringType(), True)
+    StructField("name", StringType(), True),
+    StructField("age", IntegerType(), True),
+    StructField("city", StringType(), True)
 ])
 
 # Data to be included in the DataFrame
@@ -26,25 +26,29 @@ data = [
 # Create DataFrame
 df = spark.createDataFrame(data, schema)
 
-# Display the DataFrame
 df.show()
 
+# Showing different syntax for filtering
+df2 = df.filter(df.age >= 30)
+df2.show()
+df3 = df.filter('age == 35')
+df3.show()
+df4 = df.filter(col('age') == 30)
+df4.show()
 
-def mult_col(x, factor: int) -> int:
-    if x is None:
-        return 100
-    else:
-        return x * factor
+data = [("James", "Sales", 3000),
+        ("Michael", "Sales", 4600),
+        ("Robert", "Sales", 4100),
+        ("Maria", "Finance", 3000),
+        ("James", "Sales", 3000),
+        ("Scott", "Finance", 3300),
+        ("Jen", "Finance", 3900),
+        ("Jeff", "Marketing", 3000),
+        ("Kumar", "Marketing", 2000),
+        ("Saif", "Sales", 4100)]
+columns = ["Employee_Name", "Department", "Salary"]
 
-
-spark.udf.register('mult', mult_col, IntegerType())
-
-data = [(1,), (None,), (3,)]
-columns = ["number"]
 df = spark.createDataFrame(data, columns)
-
-factor=5
-
-df_mult = df.withColumn("num_mult", mult_col(df['number'], lit(factor)))
-df_mult.show()
+df_filtered = df.filter(col("Salary") > 3000)
+df_filtered.show()
 
