@@ -2,11 +2,9 @@ from pyspark_demo.models.user import User
 from pyspark_demo.models.content import Content
 from pyspark_demo.models.activity import Activity
 from faker import Faker
-from pyspark.sql import DataFrame, SparkSession
-import json
+from pyspark.sql import SparkSession
 
 
-# Function to generate fake user data
 def generate_fake_user_data(num_users: int):
     fake = Faker()
     users = []
@@ -25,38 +23,41 @@ def generate_fake_user_data(num_users: int):
         users.append(user)
     return users
 
+
 def generate_fake_content_data(n_content: int):
     fake = Faker()
     ratings = ['G', 'PG', 'PG-13', 'R']
-    content_list =[]
+    content_list = []
 
     for _ in range(n_content):
         content = Content(
-            content_id = fake.unique.random_int(min=1, max=n_content),
-            title = fake.sentence(nb_words=5).rstrip('.'),
-            rating = fake.random_element(elements=ratings),
-            running_time = fake.random_int(min=30, max=180)
+            content_id=fake.unique.random_int(min=1, max=n_content),
+            title=fake.sentence(nb_words=5).rstrip('.'),
+            rating=fake.random_element(elements=ratings),
+            running_time=fake.random_int(min=30, max=180)
         )
         content_list.append(content)
 
     return content_list
 
-def generate_fake_activity(n_activity: int, n_users: int, n_content:int):
+
+def generate_fake_activity(n_activity: int, n_users: int, n_content: int):
     fake = Faker()
     activity_list = []
 
     for _ in range(n_activity):
         activity = Activity(
-            activity_id = fake.unique.random_int(min=1, max=n_activity),
-            user_id = fake.random_int(min=1, max=n_users),
-            content_id = fake.random_int(min=1, max=n_content),
-            latest_date_watched = fake.date_between(),
-            latest_running_time = fake.random_int(min=1, max=180)
+            activity_id=fake.unique.random_int(min=1, max=n_activity),
+            user_id=fake.random_int(min=1, max=n_users),
+            content_id=fake.random_int(min=1, max=n_content),
+            latest_date_watched=fake.date_between(),
+            latest_running_time=fake.random_int(min=1, max=180)
         )
 
         activity_list.append(activity)
 
     return activity_list
+
 
 n_users = 10
 n_content = 20
@@ -79,7 +80,6 @@ spark = (SparkSession.builder
          .appName("FakerDataframes")
          .getOrCreate()
          )
-
 
 users_rdd = spark.sparkContext.parallelize(fake_users)
 users_df = spark.read.json(users_rdd)
