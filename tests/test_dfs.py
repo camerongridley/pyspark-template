@@ -1,47 +1,13 @@
 import pytest
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, BooleanType
 from pyspark_demo.models.user import User
-from pyspark.sql.functions import col
+from pyspark_demo.utils import transformations
+from tests.fixtures.data import df
+from tests.fixtures.spark_session import spark
 
 
-@pytest.fixture(scope="session")
-def spark() -> SparkSession:
-    """
-    Fixture for creating a Spark session.
-    """
-    spark = SparkSession.builder \
-        .master("local[2]") \
-        .appName("PySparkTest") \
-        .getOrCreate()
-
-    yield spark
-
-    spark.stop()
-
-
-def filter_active_users(input_df: DataFrame) -> DataFrame:
-    """Filter active users from the input DataFrame."""
-    filtered_df = input_df.filter(col("is_active") == True)
-    return filtered_df
-
-
-def test_active_user_filtering(spark: SparkSession):
-    # Define schema for the input data
-    schema = StructType([
-        StructField("user_id", IntegerType(), True),
-        StructField("username", StringType(), True),
-        StructField("is_active", BooleanType(), True)
-    ])
-
-    data = [
-        (1, "Alice", True),
-        (2, "Bob", False),
-        (3, "Charlie", True)
-    ]
-    input_df = spark.createDataFrame(data, schema)
-
-    result_df = filter_active_users(input_df)
+def test_active_user_filtering(spark: SparkSession, df: DataFrame):
+    result_df = transformations.filter_active_users(df)
 
     # Collect results and validate using Pydantic
     results = result_df.collect()
