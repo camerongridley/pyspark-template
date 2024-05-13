@@ -2,7 +2,7 @@
 name = "pyspark-demo"
 version = "0.1.0"
 description = ""
-authors = ["Cameron Gridley <cgridley@gmail.com"]
+authors = ["Cameron Gridley <cgridley@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
