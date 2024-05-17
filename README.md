@@ -1,4 +1,4 @@
-# pyspark-demo
+# pyspark-template
 Full pyspark app with poetry, pydantic and pytest
 
 ## Setup

@@ -1,7 +1,7 @@
 import pytest
 from pyspark.sql import SparkSession, DataFrame
-from pyspark_demo.models.user import User
-from pyspark_demo.utils import transformations
+from pyspark_template.models.user import User
+from pyspark_template.utils import transformations
 from tests.fixtures.data import df
 from tests.fixtures.spark_session import spark
 

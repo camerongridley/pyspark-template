@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
 from pyspark.sql.functions import col, lit
-from pyspark_demo.utils.udfs import mult_col, handle_null_example
+from pyspark_template.utils.udfs import mult_col, handle_null_example
 
 
 spark = SparkSession.builder \

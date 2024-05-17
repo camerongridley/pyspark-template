@@ -1,6 +1,6 @@
-from pyspark_demo.models.user import User
-from pyspark_demo.models.content import Content
-from pyspark_demo.models.activity import Activity
+from pyspark_template.models.user import User
+from pyspark_template.models.content import Content
+from pyspark_template.models.activity import Activity
 from faker import Faker
 import uuid
 from pyspark.sql import SparkSession, DataFrame
@@ -145,7 +145,7 @@ def generate_and_save_streaming_service_data(
 
 
 if __name__ == "__main__":
-    from pyspark_demo.utils.spark_session import get_spark_session
+    from pyspark_template.utils.spark_session import get_spark_session
 
     spark = get_spark_session()
     n_users = 100000

@@ -1,6 +1,6 @@
-from pyspark_demo.utils import spark_session, math_ops
-from pyspark_demo.utils.generate_data import generate_and_save_streaming_service_data
-from pyspark_demo.utils.transformations import filter_active_users
+from pyspark_template.utils import spark_session, math_ops
+from pyspark_template.utils.generate_data import generate_and_save_streaming_service_data
+from pyspark_template.utils.transformations import filter_active_users
 import argparse
 
 # parser = argparse.ArgumentParser(description='Spark job args')

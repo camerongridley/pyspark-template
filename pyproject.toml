@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pyspark-demo"
+name = "pyspark-template"
 version = "0.1.0"
 description = ""
 authors = ["Cameron Gridley <cgridley@gmail.com>"]
