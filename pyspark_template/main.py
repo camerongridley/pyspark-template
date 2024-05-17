@@ -1,7 +1,6 @@
-from pyspark_template.utils import spark_session, math_ops
+from pyspark_template.utils import spark_session
 from pyspark_template.utils.generate_data import generate_and_save_streaming_service_data
-from pyspark_template.utils.transformations import filter_active_users
-import argparse
+from pyspark_template.transformations.filtering import filter_active_users
 
 # parser = argparse.ArgumentParser(description='Spark job args')
 # parser.add_argument('s3_user', type=str, default='', help='s3 prefix for the user data')

@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pydantic import BaseModel
 
 """
-This group of functions is for creating fake data for use in this demo repo. See the README for details on usage.
+This group of functions is for creating fake data for use in this template repo. See the README for details on usage.
 """
 
 
