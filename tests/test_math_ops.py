@@ -1,4 +1,3 @@
-import pytest
 from pyspark_demo.utils import math_ops
 
 
