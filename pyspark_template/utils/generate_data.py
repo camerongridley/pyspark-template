@@ -113,6 +113,7 @@ def generate_and_save_streaming_service_data(
     n_activity: int,
     base_save_path: str,
 ) -> tuple[DataFrame, DataFrame, DataFrame]:
+
     mode_choice = "overwrite"
 
     fake_users = generate_fake_user_data(n_users)

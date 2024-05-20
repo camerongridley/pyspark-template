@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType, BooleanType
+
+
 class User(BaseModel):
     user_id: int
     username: str
@@ -12,3 +15,17 @@ class User(BaseModel):
     country: Optional [str] = None
     age: Optional [int] = None
 
+def user_schema():
+    schema = StructType([
+        StructField("user_id", IntegerType(), True),
+        StructField("username", StringType(), True),
+        StructField("is_active", BooleanType(), True),
+        StructField("address", StringType(), True),
+        StructField("city", StringType(), True),
+        StructField("state", StringType(), True),
+        StructField("area_code", IntegerType(), True),
+        StructField("country", StringType(), True),
+        StructField("age", IntegerType(), True)
+    ])
+
+    return schema

@@ -1,6 +1,7 @@
 from pyspark_template.utils import spark_session
 from pyspark_template.utils.generate_data import generate_and_save_streaming_service_data
 from pyspark_template.transformations.filtering import filter_active_users
+from pyspark_template.transformations.feature_engineering import create_age_group
 
 # parser = argparse.ArgumentParser(description='Spark job args')
 # parser.add_argument('s3_user', type=str, default='', help='s3 prefix for the user data')
@@ -29,10 +30,11 @@ users_raw_df, content_raw_df, activity_raw_df = (
 # activity_raw_df = spark.read.parquet('s3://pyspark-demo-data/streaming/activity/')
 
 active_users_df = filter_active_users(users_raw_df)
+active_age_grps_df = create_age_group(active_users_df)
 
 joined_df = (
-    active_users_df.join(
-        activity_raw_df, active_users_df.user_id == activity_raw_df.user_id, "inner"
+    active_age_grps_df.join(
+        activity_raw_df, active_age_grps_df.user_id == activity_raw_df.user_id, "inner"
     )
     .join(
         content_raw_df, content_raw_df.content_id == activity_raw_df.content_id, "inner"
@@ -42,3 +44,4 @@ joined_df = (
     )
 )
 joined_df.show()
+
