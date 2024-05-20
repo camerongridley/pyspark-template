@@ -1,6 +1,11 @@
 # pyspark-template
 Full pyspark app with poetry, pydantic and pytest
 
+Pydantic is not typically used for pyspark apps as the schema typically is enough to 
+handle data validation, but there are times when it can be helpful, such as validating data
+before it launches a spark cluster or for interacting with external APIs to validate
+their JSON responses.
+
 ## Setup
 1. Rename the source folder, via refactor, to match the repo name but with an underscore.
 2. Run `poetry install --sync` (sync is optional)
