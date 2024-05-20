@@ -1,5 +1,7 @@
 # pyspark-template
-Full pyspark app with poetry, pydantic and pytest
+Full pyspark app with poetry, pydantic and pytest.
+
+Pydantic is used in conjunction with Faker to help fake datasets.
 
 ## Setup
 1. Rename the source folder, via refactor, to match the repo name but with an underscore.
