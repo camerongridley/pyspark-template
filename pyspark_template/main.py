@@ -1,5 +1,5 @@
 from pyspark_template.utils import spark_session
-from pyspark_template.utils.generate_data import generate_and_save_streaming_service_data
+from pyspark_template.utils.generate_data import StreamingDataGenerator
 from pyspark_template.transformations.filtering import filter_active_users
 from pyspark_template.transformations.feature_engineering import create_age_group
 
@@ -22,11 +22,8 @@ n_users = 10
 n_content = 20
 n_activity = 30
 
-users_raw_df, content_raw_df, activity_raw_df = (
-    generate_and_save_streaming_service_data(
-        spark, n_users, n_content, n_activity, "../data/streaming"
-    )
-)
+streaming_service_generator = StreamingDataGenerator(spark, n_users, n_content, n_activity)
+users_raw_df, content_raw_df, activity_raw_df = streaming_service_generator.generate_streaming_service_data()
 
 active_users_df = filter_active_users(users_raw_df)
 active_age_grps_df = create_age_group(active_users_df)

@@ -22,107 +22,8 @@ def generate_unique_id(start=1):
         yield start
         start += 1
 
-
-def generate_fake_user_data(num_users: int) -> list[User]:
-    """
-    Generate fake user data.
-    :param num_users: The number of users to generate
-    :return: List of User objects
-    """
-    fake = Faker()
-    id_generator = generate_unique_id()
-    users = []
-    for _ in range(num_users):
-        user = User(
-            user_id=next(id_generator),
-            username=fake.user_name(),
-            is_active=fake.boolean(chance_of_getting_true=70),
-            address=fake.street_address(),
-            city=fake.city(),
-            state=fake.state(),
-            area_code=fake.postcode(),
-            country=fake.country(),
-            age=(
-                fake.random_int(min=12, max=100)
-                if fake.boolean(chance_of_getting_true=80)
-                else None
-            ),
-        )
-        users.append(user)
-    return users
-
-
-def generate_fake_content_data(n_content: int) -> list[Content]:
-    """
-    Generate fake content data.
-    :param n_content: Number of content rows to create
-    :return: List of Content objects
-    """
-    fake = Faker()
-    id_generator = generate_unique_id()
-    ratings = ["G", "PG", "PG-13", "R"]
-    content_list = []
-
-    for _ in range(n_content):
-        content = Content(
-            content_id=next(id_generator),
-            title=fake.sentence(nb_words=5).rstrip("."),
-            rating=fake.random_element(elements=ratings),
-            running_time=fake.random_int(min=30, max=180),
-        )
-        content_list.append(content)
-
-    return content_list
-
-
-def generate_fake_activity(
-    n_activity: int, n_users: int, n_content: int
-) -> list[Activity]:
-    """
-    Generate fake activity data. This needs the number of users and content to work. Since the keys are sequential
-    values starting at 1, it uses the length of the list to randomly generate foreign keys in the activity data.
-    :param n_activity: Number of activity rows to create
-    :param n_users: Length of the user list
-    :param n_content: Length of the content list
-    :return: List of Activity objects
-    """
-    fake = Faker()
-    id_generator = generate_unique_id()
-    activity_list = []
-
-    for _ in range(n_activity):
-        activity = Activity(
-            activity_id=next(id_generator),
-            user_id=fake.random_int(min=1, max=n_users),
-            content_id=fake.random_int(min=1, max=n_content),
-            latest_date_watched=fake.date_between(),
-            latest_running_time=fake.random_int(min=1, max=180),
-        )
-
-        activity_list.append(activity)
-
-    return activity_list
-
-
-def convert_model_list_to_dataframe(
-    spark: SparkSession, model_list: list[BaseModel]
-) -> DataFrame:
-    """
-    Convert a list of Pydantic models to a Spark DataFrame.
-    :param spark: SparkSession
-    :param model_list: List of Pydantic models
-    :return: DataFrame
-    """
-    json_data = [d.json() for d in model_list]
-    rdd = spark.sparkContext.parallelize(json_data)
-    df = spark.read.json(rdd)
-
-    return df
-
-
-def save_data(
-    df: DataFrame, file_format: str, path: str, mode_choice="errorifexists"
-) -> None:
+def save_data(df: DataFrame, file_format: str, path: str, mode_choice="errorifexists"
+              ) -> None:
     """
     Save a DataFrame file of the specified format.
     :param df: DataFrame to save
@@ -139,53 +40,156 @@ def save_data(
         raise Exception("Invalid file format.")
 
 
-def generate_and_save_streaming_service_data(
-    spark: SparkSession,
-    n_users: int,
-    n_content: int,
-    n_activity: int,
-    base_save_path: str,
-) -> tuple[DataFrame, DataFrame, DataFrame]:
-    """
-    Generate and save streaming service data using the User, Content, and Activity models.
-    :param spark: SparkSession
-    :param n_users: Number of users to generate
-    :param n_content: Numer of content to generate
-    :param n_activity: Number of activity to generate
-    :param base_save_path: Base path to save to
-    :return: Tuple of User, Content, and Activity DataFrames
-    """
+class StreamingDataGenerator():
+    def __init__(self, spark_session: SparkSession, n_users: int, n_content: int, n_activity: int):
+        """
+        Initialize data generator.
+        :param spark_session: SparkSession
+        :param n_users: Length of the user list
+        :param n_content: Length of the content list
+        :param n_activity: Number of activity rows to create
+        """
+        self.spark = spark_session
+        self.n_users = n_users
+        self.n_content = n_content
+        self.n_activity = n_activity
+        self.users_df: DataFrame = None
+        self.content_df: DataFrame = None
+        self.activity_df: DataFrame = None
 
-    mode_choice = "overwrite"
+    def generate_fake_user_data(self) -> list[User]:
+        """
+        Generate fake user data.
+        :return: List of User objects
+        """
+        fake = Faker()
+        id_generator = generate_unique_id()
+        users = []
+        for _ in range(self.n_users):
+            user = User(
+                user_id=next(id_generator),
+                username=fake.user_name(),
+                is_active=fake.boolean(chance_of_getting_true=70),
+                address=fake.street_address(),
+                city=fake.city(),
+                state=fake.state(),
+                area_code=fake.postcode(),
+                country=fake.country(),
+                age=(
+                    fake.random_int(min=12, max=100)
+                    if fake.boolean(chance_of_getting_true=80)
+                    else None
+                ),
+            )
+            users.append(user)
+        return users
 
-    fake_users = generate_fake_user_data(n_users)
-    fake_content = generate_fake_content_data(n_content)
-    fake_activity = generate_fake_activity(n_activity, n_users, n_content)
 
-    users_df = convert_model_list_to_dataframe(spark, fake_users)
-    save_data(
-        df=users_df,
-        file_format="parquet",
-        path=f"{base_save_path}/users",
-        mode_choice=mode_choice,
-    )
-    content_df = convert_model_list_to_dataframe(spark, fake_content)
-    save_data(
-        df=content_df,
-        file_format="parquet",
-        path=f"{base_save_path}/content",
-        mode_choice=mode_choice,
-    )
-    activity_df = convert_model_list_to_dataframe(spark, fake_activity)
-    save_data(
-        df=activity_df,
-        file_format="parquet",
-        path=f"{base_save_path}/activity",
-        mode_choice=mode_choice,
-    )
+    def generate_fake_content_data(self) -> list[Content]:
+        """
+        Generate fake content data.
+        :return: List of Content objects
+        """
+        fake = Faker()
+        id_generator = generate_unique_id()
+        ratings = ["G", "PG", "PG-13", "R"]
+        content_list = []
 
-    return users_df, content_df, activity_df
+        for _ in range(self.n_content):
+            content = Content(
+                content_id=next(id_generator),
+                title=fake.sentence(nb_words=5).rstrip("."),
+                rating=fake.random_element(elements=ratings),
+                running_time=fake.random_int(min=30, max=180),
+            )
+            content_list.append(content)
 
+        return content_list
+
+
+    def generate_fake_activity(self) -> list[Activity]:
+        """
+        Generate fake activity data. This needs the number of users and content to work. Since the keys are sequential
+        values starting at 1, it uses the length of the list to randomly generate foreign keys in the activity data.
+        :return: List of Activity objects
+        """
+        fake = Faker()
+        id_generator = generate_unique_id()
+        activity_list = []
+
+        for _ in range(self.n_activity):
+            activity = Activity(
+                activity_id=next(id_generator),
+                user_id=fake.random_int(min=1, max=self.n_users),
+                content_id=fake.random_int(min=1, max=self.n_content),
+                latest_date_watched=fake.date_between(),
+                latest_running_time=fake.random_int(min=1, max=180),
+            )
+
+            activity_list.append(activity)
+
+        return activity_list
+
+
+    def convert_model_list_to_dataframe(self, model_list: list[BaseModel]
+    ) -> DataFrame:
+        """
+        Convert a list of Pydantic models to a Spark DataFrame.
+        :param model_list: List of Pydantic models
+        :return: DataFrame
+        """
+        json_data = [d.json() for d in model_list]
+        rdd = self.spark.sparkContext.parallelize(json_data)
+        df = self.spark.read.json(rdd)
+
+        return df
+
+
+    def generate_streaming_service_data(self) -> tuple[DataFrame, DataFrame, DataFrame]:
+        """
+        Generate streaming service data using the User, Content, and Activity models.
+        :return: Tuple of User, Content, and Activity DataFrames
+        """
+        fake_users = self.generate_fake_user_data()
+        fake_content = self.generate_fake_content_data()
+        fake_activity = self.generate_fake_activity()
+
+        self.users_df = self.convert_model_list_to_dataframe(fake_users)
+
+        self.content_df = self.convert_model_list_to_dataframe(fake_content)
+
+        self.activity_df = self.convert_model_list_to_dataframe(fake_activity)
+
+        return self.users_df, self.content_df, self.activity_df
+
+    def save_streaming_data(self, base_save_path: str, mode_choice = "overwrite") -> None:
+        """
+        Save streaming data to parquet files.
+        :param base_save_path: Base path to save to
+        :param mode_choice: Spark write mode, defaults to "overwrite". Can also be "errorifexists" or "append".
+        :return: None
+        """
+
+        save_data(
+            df=self.users_df,
+            file_format="parquet",
+            path=f"{base_save_path}/users",
+            mode_choice=mode_choice,
+        )
+
+        save_data(
+            df=self.content_df,
+            file_format="parquet",
+            path=f"{base_save_path}/content",
+            mode_choice=mode_choice,
+        )
+
+        save_data(
+            df=self.activity_df,
+            file_format="parquet",
+            path=f"{base_save_path}/activity",
+            mode_choice=mode_choice,
+        )
 
 if __name__ == "__main__":
     from pyspark_template.utils.spark_session import get_spark_session
@@ -195,6 +199,7 @@ if __name__ == "__main__":
     n_content = 20000
     n_activity = 300000
 
-    generate_and_save_streaming_service_data(
-        spark, n_users, n_content, n_activity, "../data/streaming"
-    )
+    streaming_data_generator = StreamingDataGenerator(spark, n_users, n_content, n_activity)
+    streaming_data_generator.generate_streaming_service_data()
+    streaming_data_generator.save_streaming_data(base_save_path="../data/streaming", mode_choice="overwrite")
+
