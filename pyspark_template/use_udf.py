@@ -3,7 +3,10 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 from pyspark.sql.functions import col, lit
 from pyspark_template.utils.udfs import mult_col, handle_null_example
 
-
+"""
+This is an example of how to use UDFs in PySpark.
+It includes an example of how nulls do not trigger a UDF.
+"""
 spark = SparkSession.builder \
     .appName('pyspark template') \
     .getOrCreate()

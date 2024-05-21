@@ -4,6 +4,10 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 
 
 def get_user_schema():
+    """
+    Get user schema StructType
+    :return: StructType for user
+    """
     return StructType([
         StructField("user_id", IntegerType(), True),
         StructField("username", StringType(), True),
@@ -18,6 +22,17 @@ def get_user_schema():
 
 
 class User(BaseModel):
+    """
+    user_id: int - unique id for each user
+    username: str - username of the user
+    is_active: bool - whether the user is active or not
+    address: str - address of the user
+    city: str - city of the user
+    state: str - state of the user
+    area_code: int - area code of the user
+    country: str - country of the user
+    age: int - age of the user
+    """
     user_id: int
     username: str
     is_active: bool

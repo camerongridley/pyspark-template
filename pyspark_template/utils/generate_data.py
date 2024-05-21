@@ -7,22 +7,28 @@ from pyspark.sql import SparkSession, DataFrame
 from pydantic import BaseModel
 
 """
-This group of functions is for creating fake data for use in this template repo. See the README for details on usage.
+This group of functions is for creating fake data for use in this template repo. 
+It uses the Faker library to generate data and Pydantic models to define the schema and validate generated data.
 """
 
 
 def generate_unique_id(start=1):
-    '''
+    """
     Generate a unique id starting at the start parameter.
     :param start:int: the number to start with
     :return int: an id
-    '''
+    """
     while True:
         yield start
         start += 1
 
 
-def generate_fake_user_data(num_users: int):
+def generate_fake_user_data(num_users: int) -> list[User]:
+    """
+    Generate fake user data.
+    :param num_users: The number of users to generate
+    :return: List of User objects
+    """
     fake = Faker()
     id_generator = generate_unique_id()
     users = []
@@ -46,7 +52,12 @@ def generate_fake_user_data(num_users: int):
     return users
 
 
-def generate_fake_content_data(n_content: int):
+def generate_fake_content_data(n_content: int) -> list[Content]:
+    """
+    Generate fake content data.
+    :param n_content: Number of content rows to create
+    :return: List of Content objects
+    """
     fake = Faker()
     id_generator = generate_unique_id()
     ratings = ["G", "PG", "PG-13", "R"]
@@ -66,7 +77,15 @@ def generate_fake_content_data(n_content: int):
 
 def generate_fake_activity(
     n_activity: int, n_users: int, n_content: int
-) -> list[BaseModel]:
+) -> list[Activity]:
+    """
+    Generate fake activity data. This needs the number of users and content to work. Since the keys are sequential
+    values starting at 1, it uses the length of the list to randomly generate foreign keys in the activity data.
+    :param n_activity: Number of activity rows to create
+    :param n_users: Length of the user list
+    :param n_content: Length of the content list
+    :return: List of Activity objects
+    """
     fake = Faker()
     id_generator = generate_unique_id()
     activity_list = []
@@ -88,6 +107,12 @@ def generate_fake_activity(
 def convert_model_list_to_dataframe(
     spark: SparkSession, model_list: list[BaseModel]
 ) -> DataFrame:
+    """
+    Convert a list of Pydantic models to a Spark DataFrame.
+    :param spark: SparkSession
+    :param model_list: List of Pydantic models
+    :return: DataFrame
+    """
     json_data = [d.json() for d in model_list]
     rdd = spark.sparkContext.parallelize(json_data)
     df = spark.read.json(rdd)
@@ -98,6 +123,14 @@ def convert_model_list_to_dataframe(
 def save_data(
     df: DataFrame, file_format: str, path: str, mode_choice="errorifexists"
 ) -> None:
+    """
+    Save a DataFrame file of the specified format.
+    :param df: DataFrame to save
+    :param file_format: File format to save as
+    :param path: Path to save to
+    :param mode_choice: Spark write mode, defaults to "errorifexists". Can also be "overwrite" or "append".
+    :return:
+    """
     if file_format == "parquet":
         df.write.mode(mode_choice).parquet(path)
     elif file_format == "csv":
@@ -113,6 +146,15 @@ def generate_and_save_streaming_service_data(
     n_activity: int,
     base_save_path: str,
 ) -> tuple[DataFrame, DataFrame, DataFrame]:
+    """
+    Generate and save streaming service data using the User, Content, and Activity models.
+    :param spark: SparkSession
+    :param n_users: Number of users to generate
+    :param n_content: Numer of content to generate
+    :param n_activity: Number of activity to generate
+    :param base_save_path: Base path to save to
+    :return: Tuple of User, Content, and Activity DataFrames
+    """
 
     mode_choice = "overwrite"
 

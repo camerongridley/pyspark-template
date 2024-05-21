@@ -13,6 +13,9 @@ from pyspark_template.transformations.feature_engineering import create_age_grou
 # s3_content = args.s3_content
 # s3_activity = args.s3_activity
 
+# users_raw_df = spark.read.parquet(s3_user)
+# content_raw_df = spark.read.parquet(s3_content)
+# activity_raw_df = spark.read.parquet(s3_activity)
 spark = spark_session.get_spark_session()
 
 n_users = 10
@@ -25,10 +28,6 @@ users_raw_df, content_raw_df, activity_raw_df = (
     )
 )
 
-# users_raw_df = spark.read.parquet('s3://pyspark-demo-data/streaming/users/')
-# content_raw_df = spark.read.parquet('s3://pyspark-demo-data/streaming/content/')
-# activity_raw_df = spark.read.parquet('s3://pyspark-demo-data/streaming/activity/')
-
 active_users_df = filter_active_users(users_raw_df)
 active_age_grps_df = create_age_group(active_users_df)
 
@@ -40,8 +39,7 @@ joined_df = (
         content_raw_df, content_raw_df.content_id == activity_raw_df.content_id, "inner"
     )
     .select(
-        ["username", "is_active", "title", "latest_date_watched", "latest_running_time"]
+        ["username", "age_group", "is_active", "title", "latest_date_watched", "latest_running_time"]
     )
 )
 joined_df.show()
-
