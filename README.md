@@ -23,7 +23,7 @@ for the fake data.
 6. Click OK and you should be able to run `main.py`
 
 ## Running the Project
-Run main.py for sample job that uses the transformations found in the transformations module.
+Run main.py for sample job that generates fake data and uses the transformations found in the transformations module.
 
 ## Fake Data Generation
 The app processes data from a fictional content provider. The tables are `user`, `content` and `activity`.
